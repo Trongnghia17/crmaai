@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+    # PHP Application
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel11-app
+        restart: unless-stopped
+        working_dir: /var/www
+        volumes:
+            - ./:/var/www
+            - ./vendor:/var/www/vendor
+        networks:
+            - laravel-network
+        dns:
+            - 8.8.8.8
+            - 8.8.4.4
+
+    # Nginx Service
+    nginx:
+        image: nginx:alpine
+        container_name: laravel11-nginx
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/conf.d:/etc/nginx/conf.d/
+        networks:
+            - laravel-network
+
+    # MySQL Service
+    db:
+        image: mysql:8.0
+        container_name: laravel11-db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: sale_management
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        ports:
+            - "3307:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - laravel-network
+
+    # MeiliSearch Service
+    meilisearch:
+        image: getmeili/meilisearch:latest
+        container_name: laravel11-meilisearch
+        restart: unless-stopped
+        environment:
+            - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKey123}
+            - MEILI_NO_ANALYTICS=true
+            - MEILI_ENV=development
+        ports:
+            - "7700:7700"
+        volumes:
+            - meilisearch_data:/meili_data
+        networks:
+            - laravel-network
+
+networks:
+    laravel-network:
+        driver: bridge
+
+volumes:
+    mysql_data:
+    meilisearch_data:
