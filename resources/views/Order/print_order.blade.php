@@ -6,163 +6,229 @@
 </head>
 <body>
 <style>
+    @page {
+        size: 80mm auto;
+        margin: 0;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     body {
-        font-size: 18px;
-        font-weight: bold !important;
+        margin: 0;
+        padding: 0;
+        font-size: 11px;
+        font-family: Arial, sans-serif;
+        width: 80mm;
     }
 
     .container {
-        max-width: 426px;
+        width: 80mm;
+        max-width: 80mm;
+        margin: 0;
+        padding: 5px 10px;
     }
 
-    .logo img {
-        max-width: 35%;
-        margin-bottom: 5px;
-    }
-
-    .address {
-        font-size: 22px;
-        margin-bottom: 10px;
+    .store-info {
         text-align: center;
+        font-size: 10px;
+        line-height: 1.4;
+        margin-bottom: 8px;
+    }
+
+    .store-name {
+        font-weight: bold;
+        font-size: 12px;
     }
 
     .title {
         text-transform: uppercase;
         text-align: center;
-        font-weight: 700;
-        font-size: 22px;
-        margin: 0px 0px;
+        font-weight: bold;
+        font-size: 13px;
+        margin: 0;
     }
 
     .line-dashed {
-        border-bottom: 1px dashed black;
-        margin: 10px 0px;
+        border-bottom: 1px dashed #000;
+        margin: 8px 0;
+    }
+
+    .invoice_top {
+        font-size: 10px;
+        line-height: 1.5;
+        margin-bottom: 8px;
     }
 
     .invoice_top p {
-        font-size: 14px;
-        margin: 0
+        margin: 2px 0;
     }
 
     .item_cart table {
-        font-size: 14px;
+        font-size: 10px;
         width: 100%;
+        border-collapse: collapse;
+    }
+
+    .item_cart th {
+        font-weight: bold;
+        text-align: left;
+        padding: 4px 2px;
+        border-bottom: 1px dashed #000;
+    }
+
+    .item_cart td {
+        padding: 4px 2px;
+        vertical-align: top;
+    }
+
+    .item_cart .text-right {
+        text-align: right;
+    }
+
+    .item_cart .text-center {
+        text-align: center;
     }
 
     .total {
-        padding: 0px 5px
+        font-size: 11px;
+        margin-top: 8px;
     }
 
     .total table {
         width: 100%;
-        font-weight: 700;
     }
 
-    .total table tr td:first-child {
-        font-weight: 700;
+    .total td {
+        padding: 3px 0;
     }
 
-    .w-full {
-        width: 100%;
-        padding: 0px 5px;
+    .total .label {
+        font-weight: normal;
     }
 
-    .ql-align-center {
-        text-align: center !important;
+    .total .value {
+        text-align: right;
+        font-weight: bold;
     }
 
-    .ql-align-right {
-        text-align: center !important;
+    .qr-code {
+        text-align: center;
+        margin: 15px 0;
+    }
+
+    .footer-text {
+        text-align: center;
+        font-size: 10px;
+        line-height: 1.4;
+        margin: 5px 0;
+    }
+
+    .reference {
+        font-size: 10px;
+        margin: 5px 0;
     }
 </style>
 
 @php
     $total = 0;
+    $totalDiscount = 0; // Tổng chiết khấu từng sản phẩm
     $user = auth()->user();
     $totalOrder = 0;
 @endphp
 
-<div class="container pt-3">
-    <div class="line-dashed"></div>
-    <p class="title">{{ $user->store_name }}</p>
+<div class="container">
+    <div class="store-info">
+        <div class="store-name">AAIPHARMA</div>
+            <div>Địa chỉ: SH2B, HH03 Eco Lake View, 32 Đại Từ, Định Công, Hà Nội</div>
+        
+    </div>
 
     <div class="line-dashed"></div>
 
     <!-- Tiêu đề -->
     @if($order->type == 1)
-        <p class="title">HÓA ĐƠN BÁN HÀNG</p>
+        <p class="title">HÓA ĐƠN TẠM TÍNH</p>
     @elseif($order->type == 2)
         <p class="title">HÓA ĐƠN NHẬP HÀNG</p>
     @else
         <p class="title">HÓA ĐƠN TRẢ HÀNG</p>
     @endif
+    
+    <div style="text-align: center; font-size: 10px; margin-bottom: 8px;">
+        Ngày {{ date('d', strtotime($order->created_at)) }} tháng {{ date('m', strtotime($order->created_at)) }} năm {{ date('Y', strtotime($order->created_at)) }}
+    </div>
+
+    <div class="invoice_top">
+        @if($order->type == 1)
+            <p>Khách hàng: {{$order->customer->name ?? 'Khách lẻ'}}</p>
+        @elseif($order->type == 2)
+            <p>Nhà cung cấp: {{$order->supplier->name ?? ''}}</p>
+        @endif
+        <p>Số hóa đơn: {{@$order->code}}</p>
+        <p>Nhân viên: {{$order->user->name ?? ''}}</p>
+    </div>
 
     <div class="line-dashed"></div>
 
-
-
-    <!-- QR Code -->
-    <div class="qr" style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
-        <div style="
-        display: inline-block;
-        padding: 10px;
-        border: 2px dashed #ccc;
-        border-radius: 8px;
-    ">
-            {!! $qrCode !!}
-        </div>
-    </div>
-
-    <div class="row" style="padding: 0 2%; width: 100%; font-size: 14px !important;">
-        <div class="col-sm-6 col-6" style="float:left; width: 50%">
-            <div class="invoice_top">
-                <p><strong>T.Ngân</strong>: {{$order->user->name ?? ''}}</p>
-                <p><strong>SDT</strong>: {{$order->user->phone}}</p>
-                <p><strong>No</strong>: {{ @$order->user->code}}</p>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-6" style="float:left; width: 48%">
-            <div class="invoice_top">
-                <p><strong>Thời gian</strong>: {{ $order->created_date ?? $order->created_at }}</p>
-                @if($order->type == 1)
-                    <p><strong>Khách</strong>: {{$order->customer->name ?? ''}}</p>
-                    <p><strong>SDT</strong>: {{ $order->customer->phone ?? '' }}</p>
-                @elseif($order->type == 2)
-                    <p><strong>Nhà cung cấp</strong>: {{$order->supplier->name ?? ''}}</p>
-                    <p><strong>SDT</strong>: {{ $order->supplier->phone ?? '' }}</p>
-                @endif
-
-            </div>
-        </div>
-    </div>
-
     @if ($order->type == 1)
-    <div class="item_cart" style="font-size: 14px !important;">
-        <div class="col">
-            <table class="table table-bordered">
+    <div class="item_cart">
+        <table>
+            <thead>
                 <tr>
-                    <th style="width: 40%;">Mặt hàng</th>
-                    <th>SL</th>
-                    <th>Đơn giá</th>
-                    <th class="text-end">T.Tiền</th>
+                    <th>Tên</th>
+                    <th class="text-center">SL</th>
+                    <th class="text-right">Đơn giá</th>
+                    <th class="text-right">Thành tiền</th>
                 </tr>
-                <!-- Dữ liệu sản phẩm sẽ được thêm ở đây -->
+            </thead>
+            <tbody>
                 @foreach($order->orderDetail ?? [] as $item)
-
                     @php
-                    $total += $item->retail_cost;
-
+                    $itemPrice = $item->product->retail_cost;
+                    $itemSubTotal = $itemPrice * $item->quantity;
+                    $discountAmount = 0;
+                    
+                    // Tính giảm giá nếu có
+                    if ($item->discount > 0) {
+                        if ($item->discount_type == 1) {
+                            // Giảm theo %
+                            $discountAmount = $itemSubTotal * $item->discount / 100;
+                        } else {
+                            // Giảm theo số tiền
+                            $discountAmount = $item->discount;
+                        }
+                    }
+                    
+                    $itemTotal = $itemSubTotal - $discountAmount;
+                    $total += $itemSubTotal; // Tổng tiền chưa trừ giảm giá
+                    $totalDiscount += $discountAmount; // Tổng tiền giảm từng sản phẩm
                     @endphp
                     <tr>
-                        <td style="width: 40%;">{{ $item->product->name }}</td>
-                        <td>{{ $item->quantity }}</td>
-                        <td>{{ number_format($item->product->retail_cost, 0, ',', '.') }} đ</td>
-                        <td class="text-end">{{ number_format($item->product->retail_cost * $item->quantity, 0, ',', '.') }} đ</td>
+                        <td>
+                            {{ $item->product->name }}
+                            @if($item->discount > 0)
+                                <br><small style="color: black; font-size: 9px;">
+                                    (Giảm: {{ $item->discount_type == 1 ? $item->discount.'%' : number_format($item->discount, 0, ',', '.') }})
+                                </small>
+                            @endif
+                        </td>
+                        <td class="text-center">{{ $item->quantity }}</td>
+                        <td class="text-right">{{ number_format($itemPrice, 0, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format($itemTotal, 0, ',', '.') }}
+                              @if($item->discount > 0)
+                                <br><span style="color: black; ">
+                                    {{ '-' . number_format($discountAmount, 0, ',', '.') }}
+                                </span>
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
-            </table>
-        </div>
+            </tbody>
+        </table>
     </div>
 
     <div class="line-dashed"></div>
@@ -198,77 +264,57 @@
 
     @if ($order->type == 1)
     <!-- Tổng cộng -->
-    <div class="total" style="font-size: 14px !important;">
+    <div class="total">
         <table>
             <tr>
-                <td>TỔNG GIÁ TRỊ HÓA ĐƠN</td>
-                <td style="text-align: right">{{  number_format($total, 0, ',', '.') }} đ</td>
+                <td class="label">Tổng tiền hàng:</td>
+                <td class="value">{{ number_format($total, 0, ',', '.') }}</td>
             </tr>
-            <tr>
-                <td>GIẢM GIÁ</td>
-                @if ($order->discount_type == 2)
-                    <td style="text-align: right">{{ number_format($order->discount) . ' đ'}} </td>
-                    @php
-                        $totalOrder = $total - $order->discount;
-                    @endphp
-                @else
-                    <td style="text-align: right">{{ number_format($order->discount) . '%'}}</td>
-                    @php
-                        $totalOrder = $total - ($total * $order->discount / 100);
-                    @endphp
-                @endif
-            </tr>
-            <tr>
-                <td>VAT</td>
-
-                @if ($order->vat > 0)
-                    <td style="text-align: right">{{ $order->vat . '%' }}</td>
-                    @php
-                        $totalOrder = $totalOrder + ($totalOrder * $order->vat / 100);
-                    @endphp
-                @else
-                    <td style="text-align: right">0%</td>
-                @endif
-            </tr>
-
-            <tr>
-                <td>TỔNG TIỀN</td>
-
-                <td style="text-align: right">{{ number_format($order->retail_cost, 0, ',', '.')}} đ</td>
-            </tr>
-
-            @php
-                $orderPayment = collect($order->orderPayment)->sum('price');
-
-            @endphp
-            <tr>
-                <td>ĐÃ THANH TOÁN</td>
-                <td style="text-align: right">{{ number_format($orderPayment, 0, ',', '.')}} đ</td>
-            </tr>
-
-            @if ($order->retail_cost - $orderPayment > 0 )
+            @if ($order->discount > 0 || $totalDiscount > 0)
                 <tr>
-                    <td>CÒN NỢ</td>
-                    <td style="text-align: right">{{ number_format(($order->retail_cost - $orderPayment) ,0, ',', '.')}} đ</td>
+                    <td class="label">Chiết khấu:</td>
+                    @php
+                        // Tính chiết khấu đơn hàng
+                        $orderDiscount = 0;
+                        if ($order->discount > 0) {
+                            if ($order->discount_type == 2) {
+                                $orderDiscount = $order->discount;
+                            } else {
+                                $orderDiscount = $total * $order->discount / 100;
+                            }
+                        }
+                        // Tổng chiết khấu = chiết khấu sản phẩm + chiết khấu đơn hàng
+                        $totalAllDiscount = $totalDiscount + $orderDiscount;
+                        $totalOrder = $total - $totalAllDiscount;
+                    @endphp
+                    <td class="value">{{ number_format($totalAllDiscount, 0, ',', '.') }}</td>
                 </tr>
-                @if ($customer_debt && $customer_debt > 0)
-                    <tr>
-                        <td>NỢ CŨ</td>
-                        <td style="text-align: right">{{ number_format(($customer_debt - ($order->retail_cost - $orderPayment)), 0, ',', '.' )}} đ</td>
-                    </tr>
-                    <tr>
-                        <td>TỔNG NỢ</td>
-                        <td style="text-align: right">{{ number_format($customer_debt, 0, ',', '.' )}} đ</td>
-                    </tr>
-                @endif
             @else
-                <tr>
-                    <td>TIỀN THỪA TRẢ KHÁCH</td>
-                    <td style="text-align: right">{{ number_format(($orderPayment - $order->retail_cost), 0, ',', '.' )}} đ</td>
-                </tr>
+                @php
+                    $totalOrder = $total;
+                @endphp
             @endif
 
+            @if ($order->vat > 0)
+                <tr>
+                    <td class="label">VAT ({{ $order->vat }}%):</td>
+                    <td class="value">{{ number_format($totalOrder * $order->vat / 100, 0, ',', '.') }}</td>
+                </tr>
+                @php
+                    $totalOrder = $totalOrder + ($totalOrder * $order->vat / 100);
+                @endphp
+            @endif
+        </table>
+    </div>
 
+    <div class="line-dashed"></div>
+
+    <div class="total">
+        <table>
+            <tr>
+                <td class="label" style="font-size: 12px;"><strong>Tổng thanh toán:</strong></td>
+                <td class="value" style="font-size: 12px;"><strong>{{ number_format($order->retail_cost, 0, ',', '.') }}</strong></td>
+            </tr>
         </table>
     </div>
 
@@ -343,19 +389,17 @@
             </table>
         </div>
     @endif
-    <div class="line-dashed"></div>
-    <table class="w-full" style=" font-size: 14px !important;">
-        <tr>
-            <td class="fs-6">Số tham chiếu</td>
-            <td class="fs-6 text-end" style="text-align: right">{{@$order->code}}</td>
-        </tr>
-    </table>
-    <div class="line-dashed"></div>
-    <p class="text-center fs-6 mb-1" style="text-align: center;font-size: 14px !important;">Chỉ xuất hóa đơn trong ngày</p>
-    <p class="text-center fs-6" style="text-align: center; font-size: 14px !important;">Tax Invoice will be issued within same day</p>
+
     <div class="line-dashed"></div>
 
-    <p class="text-center fs-5" style="text-align: center; font-size: 14px !important;">CẢM ƠN QUÝ KHÁCH VÀ HẸN GẶP LẠI</p>
+    <div class="footer-text" style="font-style: italic; color: black;">Aaipharma luôn đồng hành cùng quý khách hàng mọi sự hỗ trợ về về sản phẩm và sức khỏe xin vui lòng liên hệ với chúng tôi !</div>
+
+    <!-- QR Code -->
+    <div class="qr-code">
+        {!! $qrCode !!}
+    </div>
+
+    <div class="footer-text" style="font-weight: bold;">Cảm ơn và hẹn gặp lại!</div>
 </div>
 
 </body>

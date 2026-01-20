@@ -632,8 +632,8 @@ class OrderController extends Controller
             $customerDebt = null;
         }
 
-        $qrContent = $this->qr_code($order);
-        $qrCode = QrCode::encoding('UTF-8')->size(150)->generate($qrContent);
+        // QR code link to Zalo
+        $qrCode = QrCode::encoding('UTF-8')->size(150)->generate('https://zalo.me/0888472589');
 
         $dataPrint = [
             'order' => $order,
