@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
 
         $user = User::factory()->create([
             'name' => 'Test User',
-            'email' => 'test@example.com',
+            'email' => 'nghia@gmail.com',
             'type' => 1, // Admin hoặc user không cần subscription check
         ]);
 
