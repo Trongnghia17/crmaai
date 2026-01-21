@@ -27,6 +27,7 @@ class StoreRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string', 'max:255'],
             'total_money' => ['nullable', 'numeric'],
+            'note' => ['nullable', 'string'],
         ];
     }
 

@@ -18,6 +18,7 @@
         <th style="background-color: #ffff99;">Email</th>
         <th style="background-color: #ffff99;">Số điện thoại</th>
         <th style="background-color: #ffff99;">Địa chỉ</th>
+        <th style="background-color: #ffff99;">Thông tin chi tiết</th>
         <th style="background-color: #ffff99;">Ngày tạo</th>
     </tr>
     </thead>
@@ -29,6 +30,7 @@
             <td>{{ $customer->email }}</td>
             <td>{{ $customer->phone }}</td>
             <td>{{ $customer->address }}</td>
+            <td>{{ $customer->note }}</td>
             <td>{{ $customer->created_at }}</td>
         </tr>
     @endforeach

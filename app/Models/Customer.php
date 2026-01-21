@@ -16,6 +16,7 @@ class Customer extends Model
         'status',
         'user_id',
         'total_money',
+        'note',
     ];
     protected $casts = [
         'status' => 'boolean',

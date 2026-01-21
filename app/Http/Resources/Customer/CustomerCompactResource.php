@@ -22,6 +22,7 @@ class CustomerCompactResource extends JsonResource
             "email" => $this->email,
             "address" => $this->address,
             "status" => $this->status,
+            "note" => $this->note,
             "total_order" => (new OrderRepository())->totalOrderByPhone($this->id),
             "total_pay" => (new OrderRepository())->totalByPhone($this->id),
             "created_at" => $this->created_at,
