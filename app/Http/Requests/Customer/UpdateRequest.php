@@ -32,6 +32,7 @@ class UpdateRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:255'],
             'total_money' => ['nullable', 'numeric'],
             'note' => ['nullable', 'string'],
+            'health_needs' => ['nullable', 'array'],
         ];
     }
 

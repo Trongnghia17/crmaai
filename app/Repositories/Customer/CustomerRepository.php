@@ -21,6 +21,7 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
     {
         $size = $request->per_page ?? Pagination::PAGINATION;
         $query = $this->model->query()->where('status', 1);
+        
         if($request->has('search')) {
             $query->where(function ($query) use($request) {
                 $query->where('name', 'like', "%$request->search%")
@@ -28,6 +29,12 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
                     ->orWhere('email', 'like', "%$request->search%");
             });
         }
+        
+        // Filter by health_need - use JSON_SEARCH to handle Unicode properly
+        if($request->has('health_need') && $request->health_need) {
+            $query->whereRaw('JSON_SEARCH(health_needs, "one", ?) IS NOT NULL', [$request->health_need]);
+        }
+        
         build_query_by_user_id($query, auth()->user());
         build_query_sort_field($query, $request->sort ?? '');
         return $query->orderByDesc('id')->paginate($size);

@@ -17,9 +17,11 @@ class Customer extends Model
         'user_id',
         'total_money',
         'note',
+        'health_needs',
     ];
     protected $casts = [
         'status' => 'boolean',
+        'health_needs' => 'array',
     ];
 
 

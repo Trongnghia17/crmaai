@@ -19,6 +19,7 @@
         <th style="background-color: #ffff99;">Số điện thoại</th>
         <th style="background-color: #ffff99;">Địa chỉ</th>
         <th style="background-color: #ffff99;">Thông tin chi tiết</th>
+        <th style="background-color: #ffff99;">Nhu cầu sức khỏe</th>
         <th style="background-color: #ffff99;">Ngày tạo</th>
     </tr>
     </thead>
@@ -31,6 +32,7 @@
             <td>{{ $customer->phone }}</td>
             <td>{{ $customer->address }}</td>
             <td>{{ $customer->note }}</td>
+            <td>{{ is_array($customer->health_needs) ? implode(', ', $customer->health_needs) : '' }}</td>
             <td>{{ $customer->created_at }}</td>
         </tr>
     @endforeach

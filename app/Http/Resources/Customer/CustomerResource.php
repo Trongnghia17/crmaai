@@ -24,6 +24,7 @@ class CustomerResource extends JsonResource
             "status" => $this->status,
             "total_money" => $this->total_money,
             "note" => $this->note,
+            "health_needs" => $this->health_needs,
             "created_at" => $this->created_at,
             "updated_at" => $this->updated_at,
             "user_id" => $this->user_id,
