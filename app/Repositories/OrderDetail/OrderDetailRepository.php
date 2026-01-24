@@ -99,9 +99,12 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
         }
         // Apply discount if applicable
         if ($discount > 0) {
-            if (isset($detail['discount_type']) && $detail['discount_type'] == 2) {
-                // Fixed amount discount
-                $baseCost = $order->status == Order::RETURN ? $detail['price_refund'] : $baseCost - $discount;
+            // Handle both discountType (from frontend) and discount_type
+            $discountType = $detail['discount_type'] ?? $detail['discountType'] ?? 1;
+            if ($discountType == 2) {
+                // Fixed amount discount - multiply by quantity
+                $discountAmount = $discount * $detail['quantity'];
+                $baseCost = $order->status == Order::RETURN ? $detail['price_refund'] : $baseCost - $discountAmount;
             } else {
                 // Percentage discount
                 $baseCost = $baseCost - ($baseCost * $discount / 100);
@@ -128,6 +131,7 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
             "order_id" => $order->id,
             "vat" => $vat,
             "discount" => $discount,
+            "discount_type" => $detail['discount_type'] ?? $detail['discountType'] ?? 1,
             "user_cost" => $userCost
         ], $detail);
     }
@@ -149,11 +153,14 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
 
         // Apply discount if applicable
         if ($discount > 0) {
-            if (isset($detail['discount_type']) && $detail['discount_type'] == 2) {
-                // Fixed amount discount
-                $retailCost = $order->is_refund ? $detail['price_refund'] : $retailCost - $discount;
+            // Handle both discountType (from frontend) and discount_type
+            $discountType = $detail['discount_type'] ?? $detail['discountType'] ?? 1;
+            if ($discountType == 2) {
+                // Fixed amount discount - multiply by quantity
+                $discountAmount = $discount * $detail['quantity'];
+                $retailCost = $order->is_refund ? $detail['price_refund'] : $retailCost - $discountAmount;
             } else {
-                // Percentage discount - simplify calculation
+                // Percentage discount
                 $retailCost *= (1 - $discount / 100);
             }
         }
@@ -189,6 +196,7 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
             "order_id" => $order->id,
             "vat" => $vat,
             "discount" => $discount,
+            "discount_type" => $detail['discount_type'] ?? $detail['discountType'] ?? 1,
             "user_cost" => $userCost,
         ], $detail);
     }

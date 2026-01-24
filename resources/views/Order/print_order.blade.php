@@ -182,6 +182,7 @@
                     <th>Tên</th>
                     <th class="text-center">SL</th>
                     <th class="text-right">Đơn giá</th>
+                    <th class="text-right">Giảm giá</th>
                     <th class="text-right">Thành tiền</th>
                 </tr>
             </thead>
@@ -198,8 +199,8 @@
                             // Giảm theo %
                             $discountAmount = $itemSubTotal * $item->discount / 100;
                         } else {
-                            // Giảm theo số tiền
-                            $discountAmount = $item->discount;
+                            // Giảm theo số tiền (giảm giá cho mỗi sản phẩm)
+                            $discountAmount = $item->discount * $item->quantity;
                         }
                     }
                     
@@ -218,13 +219,14 @@
                         </td>
                         <td class="text-center">{{ $item->quantity }}</td>
                         <td class="text-right">{{ number_format($itemPrice, 0, ',', '.') }}</td>
-                        <td class="text-right">{{ number_format($itemTotal, 0, ',', '.') }}
-                              @if($item->discount > 0)
-                                <br><span style="color: black; ">
-                                    {{ '-' . number_format($discountAmount, 0, ',', '.') }}
-                                </span>
+                        <td class="text-right">
+                            @if($item->discount > 0)
+                                {{ number_format($discountAmount, 0, ',', '.') }}
+                            @else
+                                0
                             @endif
                         </td>
+                        <td class="text-right">{{ number_format($itemTotal, 0, ',', '.') }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -270,30 +272,49 @@
                 <td class="label">Tổng tiền hàng:</td>
                 <td class="value">{{ number_format($total, 0, ',', '.') }}</td>
             </tr>
-            @if ($order->discount > 0 || $totalDiscount > 0)
+            @php
+                // Tính tổng sau khi trừ chiết khấu sản phẩm
+                $totalAfterProductDiscount = $total - $totalDiscount;
+                
+                // Tính chiết khấu đơn hàng (tính trên tổng sau khi trừ CK sản phẩm)
+                $orderDiscount = 0;
+                if ($order->discount > 0) {
+                    if ($order->discount_type == 2) {
+                        $orderDiscount = $order->discount;
+                    } else {
+                        $orderDiscount = $totalAfterProductDiscount * $order->discount / 100;
+                    }
+                }
+                // Tổng chiết khấu = chiết khấu sản phẩm + chiết khấu đơn hàng
+                $totalAllDiscount = $totalDiscount + $orderDiscount;
+            @endphp
+            @if ($totalDiscount > 0)
                 <tr>
-                    <td class="label">Chiết khấu:</td>
-                    @php
-                        // Tính chiết khấu đơn hàng
-                        $orderDiscount = 0;
-                        if ($order->discount > 0) {
-                            if ($order->discount_type == 2) {
-                                $orderDiscount = $order->discount;
-                            } else {
-                                $orderDiscount = $total * $order->discount / 100;
-                            }
-                        }
-                        // Tổng chiết khấu = chiết khấu sản phẩm + chiết khấu đơn hàng
-                        $totalAllDiscount = $totalDiscount + $orderDiscount;
-                        $totalOrder = $total - $totalAllDiscount;
-                    @endphp
-                    <td class="value">{{ number_format($totalAllDiscount, 0, ',', '.') }}</td>
+                    <td class="label">CK sản phẩm:</td>
+                    <td class="value">-{{ number_format($totalDiscount, 0, ',', '.') }}</td>
                 </tr>
-            @else
-                @php
-                    $totalOrder = $total;
-                @endphp
             @endif
+             @if ($orderDiscount > 0)
+                <tr>
+                    <td class="label">
+                        Giảm giá
+                    
+                    </td>
+                    <td class="value">{{  $order->discount_type == 1 ? $order->discount.'%' : number_format($order->discount, 0, ',', '.').'đ' }}</td>
+                </tr>
+            @endif
+            @if ($orderDiscount > 0)
+                <tr>
+                    <td class="label">
+                        Giảm giá đơn hàng:
+                        
+                    </td>
+                    <td class="value">-{{ number_format($orderDiscount, 0, ',', '.') }}</td>
+                </tr>
+            @endif
+            @php
+                $totalOrder = $total - $totalAllDiscount;
+            @endphp
 
             @if ($order->vat > 0)
                 <tr>
