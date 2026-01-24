@@ -20,6 +20,8 @@ class Product extends Model
         'base_cost',
         'retail_cost',
         'wholesale_cost',
+        'discount',
+        'discount_type',
         'in_stock',
         'sold',
         'temporality',

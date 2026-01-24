@@ -200,6 +200,28 @@ class AuthController extends Controller
         }
     }
 
+    public function refresh()
+    {
+        try {
+            $newToken = auth()->refresh();
+            return $this->response200($this->userRepository->responseWithToken($newToken), 'Token đã được làm mới thành công!');
+        } catch (\Exception $e) {
+            Log::error('Refresh token error: ' . $e->getMessage());
+            return $this->response401('Token không hợp lệ hoặc đã hết hạn!');
+        }
+    }
+
+    public function logout()
+    {
+        try {
+            auth()->logout();
+            return $this->response200([], 'Đăng xuất thành công!');
+        } catch (\Exception $e) {
+            Log::error('Logout error: ' . $e->getMessage());
+            return $this->response500($e->getMessage());
+        }
+    }
+
     private function assignTrialPackage($user)
     {
         $trialPackage = Package::trialPackage();
