@@ -49,31 +49,22 @@ class ProductsController extends Controller
     {
         $name = $request->input('name');
         $user_id = auth()->id();
+        $perPage = $request->input('per_page', 20);
+
+        $query = Product::query()
+            ->where('is_active', true)
+            ->where('is_show', true)
+            ->where('user_id', $user_id);
 
         if ($name) {
-            $products = Product::search($name, function ($meilisearch, $query, $options) use ($user_id) {
-                $options['filter'] = 'user_id = ' . $user_id;
-                return $meilisearch->search($query, $options);
-            })->get();
-
-            $filteredResults = $products->where('is_active', true)->where('is_show', true);
-
-            $page = request('page', 1);
-            $perPage = 20;
-
-            $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
-                $filteredResults->forPage($page, $perPage),
-                $filteredResults->count(),
-                $perPage,
-                $page
-            );
-        } else {
-            $paginated = Product::query()
-                ->where('is_active', true)
-                ->where('user_id', $user_id)  // Chỉ lấy sản phẩm user này
-                ->orderByDesc('id')
-                ->paginate(20);
+            $query->where(function($q) use ($name) {
+                $q->where('name', 'LIKE', '%' . $name . '%')
+                  ->orWhere('sku', 'LIKE', '%' . $name . '%')
+                  ->orWhere('barcode', 'LIKE', '%' . $name . '%');
+            });
         }
+
+        $paginated = $query->orderByDesc('id')->paginate($perPage);
 
         $paginate = new Pagination($paginated);
 
