@@ -76,6 +76,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::post('/cancel/{id}', [OrderController::class, 'cancel']);
         Route::delete('/delete/{id}', [OrderController::class, 'delete']);
         Route::post('/payment/{id}', [OrderController::class, 'payment']);
+        Route::post('/change-customer/{id}', [OrderController::class, 'changeCustomer']);
         Route::put('/{id}', [OrderController::class, 'update']);
         Route::post('export-orders', [OrderController::class, 'exportOrder']);
         Route::post('export-customer-order/{id}', [OrderController::class, 'exportCustomerOrder']);

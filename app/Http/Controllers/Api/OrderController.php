@@ -829,6 +829,83 @@ class OrderController extends Controller
         }
 
     }
+
+    /**
+     * Change customer for an order
+     * This allows updating customer info even for completed orders
+     */
+    public function changeCustomer(Request $request, $id)
+    {
+        Log::channel('order')->info('changeCustomer: ' . json_encode($request->all()));
+        
+        try {
+            $request->validate([
+                'customer_id' => 'required|integer|exists:customers,id',
+            ]);
+
+            DB::beginTransaction();
+            
+            $order = $this->orderRepo->find($id);
+            
+            if (!$order) {
+                return $this->response404('Không tìm thấy đơn hàng');
+            }
+
+            // Check if order belongs to current user
+            $user = auth()->user();
+            if ($order->user_id !== $user->id) {
+                return $this->response403('Bạn không có quyền cập nhật đơn hàng này');
+            }
+
+            // Get customer info
+            $customer = Customer::find($request->customer_id);
+            
+            if (!$customer || $customer->status == 0) {
+                return $this->response404('Không tìm thấy khách hàng hoặc khách hàng đã bị xóa');
+            }
+
+            // If order has debt, need to update customer debt
+            if ($order->debt > 0) {
+                // Remove debt from old customer
+                if ($order->customer_id) {
+                    $oldCustomer = Customer::find($order->customer_id);
+                    if ($oldCustomer) {
+                        $oldCustomer->total_money = max(0, $oldCustomer->total_money - $order->debt);
+                        $oldCustomer->save();
+                    }
+                }
+                
+                // Add debt to new customer
+                $customer->total_money += $order->debt;
+                $customer->save();
+            }
+
+            // Update order with new customer info
+            $updateData = [
+                'customer_id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone ?? $order->phone,
+                'email' => $customer->email ?? $order->email,
+                'address' => $customer->address ?? $order->address,
+            ];
+
+            $this->orderRepo->update($id, $updateData);
+            
+            DB::commit();
+            
+            return $this->response200([
+                'message' => 'Đổi khách hàng thành công',
+                'order' => $this->orderRepo->find($id)
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::channel('order')->error('changeCustomer error: ' . $e->getMessage());
+            return $this->response500($e->getMessage());
+        }
+    }
 }
+
+
 
 
