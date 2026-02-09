@@ -107,10 +107,14 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
         }
         if ($request->has('status')) {
             if ($request->status == 3) {
+                // Khi chọn "Đã hủy", hiển thị cả status 3 và 5
                 $query->whereIn('status', [
                     Order::CANCELLED,
                     Order::CANCEL_SUCCESS
                 ]);
+            } else {
+                // Lọc theo status cụ thể (1, 2, 4, 5)
+                $query->where('status', $request->status);
             }
         }
     }

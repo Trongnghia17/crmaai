@@ -297,7 +297,7 @@
              @if ($orderDiscount > 0)
                 <tr>
                     <td class="label">
-                        Giảm giá
+                        CK theo CT
                     
                     </td>
                     <td class="value">{{  $order->discount_type == 1 ? $order->discount.'%' : number_format($order->discount, 0, ',', '.').'đ' }}</td>
@@ -306,7 +306,7 @@
             @if ($orderDiscount > 0)
                 <tr>
                     <td class="label">
-                        Giảm giá đơn hàng:
+                        Tổng giảm đơn hàng:
                         
                     </td>
                     <td class="value">-{{ number_format($orderDiscount, 0, ',', '.') }}</td>
