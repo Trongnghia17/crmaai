@@ -213,13 +213,22 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
     }
     public function __savingWithoutTimestamp($orderDetailData, $order)
     {
-        foreach ($data ?? [] as $orderDetailData) {
+        foreach ($orderDetailData ?? [] as $detailData) {
             $detail = new OrderDetail();
             $detail->order_id = $order->id;
             $detail->created_at = $order->created_at;
             $detail->updated_at = $order->updated_at;
             $detail->timestamps = false;
-            foreach ($orderDetailData->toArray() as $key => $value) {
+            
+            // Remove fields that don't exist in the database table
+            $fieldsToRemove = ['price', 'order_id'];
+            foreach ($fieldsToRemove as $field) {
+                if (isset($detailData[$field])) {
+                    unset($detailData[$field]);
+                }
+            }
+            
+            foreach ($detailData as $key => $value) {
                 $detail->{$key} = $value;
             }
             $detail->save();
