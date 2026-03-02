@@ -256,16 +256,9 @@ class OrderController extends Controller
 
             $payment = $request->get('payment');
 
+            // Chỉ lưu create_date, không ghi đè created_at/updated_at
             if (isset($data['create_date']) && !$data['create_date']) {
-                $data['create_date'] = date('Y-m-d H:i:s');
-            }
-
-            if ($request->get('create_date')) {
-                $data['created_at'] = $request->get('create_date');
-                $data['updated_at'] = $request->get('create_date');
-                $data['timestamps'] = false;
-            } else {
-                $data['create_date'] = date('Y-m-d H:i:s');
+                $data['create_date'] = date('Y-m-d');
             }
 
             $order = $this->orderRepo->updateById($data, $order);

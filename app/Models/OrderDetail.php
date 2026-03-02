@@ -24,7 +24,7 @@ class OrderDetail extends Model
         'discount_type',
         'base_cost_base',
         'retail_cost_base',
-
+        'is_gift',
     ];
 
     public function product()

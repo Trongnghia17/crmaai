@@ -137,6 +137,9 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
     }
     private function __getPriceOrderDetailSales($product, $vat, $discount, $detail, $order)
     {
+        // Kiểm tra xem có phải hàng tặng không
+        $isGift = isset($detail['is_gift']) && $detail['is_gift'] == 1;
+        
         $retailCostVat = $retailCost = $detail['price'] * $detail['quantity'];
         $retail_cost_base = $order->is_retail ? $product->retail_cost : $product->wholesale_cost;
 
@@ -145,25 +148,33 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
         if ($retail_cost_base <= 0 || $retail_cost_base < $detail['price']) {
             $retail_cost_base = $detail['price'];
         }
-        // Apply VAT if applicable
-        if ($vat > 0) {
-            $retailCostVat = $retailCost * (1 + $vat / 100);
-            $retailCost = $retailCostVat;
-        }
+        
+        // Nếu là hàng tặng, set giá bán = 0 và không áp dụng VAT/discount
+        if ($isGift) {
+            $retailCost = 0;
+            $retailCostVat = 0;
+        } else {
+            // Apply VAT if applicable
+            if ($vat > 0) {
+                $retailCostVat = $retailCost * (1 + $vat / 100);
+                $retailCost = $retailCostVat;
+            }
 
-        // Apply discount if applicable
-        if ($discount > 0) {
-            // Handle both discountType (from frontend) and discount_type
-            $discountType = $detail['discount_type'] ?? $detail['discountType'] ?? 1;
-            if ($discountType == 2) {
-                // Fixed amount discount - multiply by quantity
-                $discountAmount = $discount * $detail['quantity'];
-                $retailCost = $order->is_refund ? $detail['price_refund'] : $retailCost - $discountAmount;
-            } else {
-                // Percentage discount
-                $retailCost *= (1 - $discount / 100);
+            // Apply discount if applicable
+            if ($discount > 0) {
+                // Handle both discountType (from frontend) and discount_type
+                $discountType = $detail['discount_type'] ?? $detail['discountType'] ?? 1;
+                if ($discountType == 2) {
+                    // Fixed amount discount - multiply by quantity
+                    $discountAmount = $discount * $detail['quantity'];
+                    $retailCost = $order->is_refund ? $detail['price_refund'] : $retailCost - $discountAmount;
+                } else {
+                    // Percentage discount
+                    $retailCost *= (1 - $discount / 100);
+                }
             }
         }
+        
         // Determine if it's a return order
         $isReturn = $order->status == Order::RETURN;
         $sign = $isReturn ? '-' : '';
@@ -182,7 +193,7 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
         $retailCostBase = $retail_cost_base * $detail['quantity'];
         $wholesaleCost = ($product->wholesale_cost == 0) ? $detail['price'] : $product->wholesale_cost * $detail['quantity'];
         $baseCost = $product->base_cost * $detail['quantity'];
-        $userCost = $detail['price'] * $detail['quantity'];
+        $userCost = $isGift ? 0 : ($detail['price'] * $detail['quantity']); // Hàng tặng không có giá
 
         // Return merged array with conditional sign prefixes
         return array_merge([
@@ -195,9 +206,10 @@ class OrderDetailRepository extends BaseRepository implements OrderDetailReposit
             "vat_cost" => $sign . $retailCostVat,
             "order_id" => $order->id,
             "vat" => $vat,
-            "discount" => $discount,
+            "discount" => $isGift ? 0 : $discount, // Hàng tặng không có discount
             "discount_type" => $detail['discount_type'] ?? $detail['discountType'] ?? 1,
             "user_cost" => $userCost,
+            "is_gift" => $isGift ? 1 : 0, // Lưu trạng thái hàng tặng
         ], $detail);
     }
     private function __savingRefundOrderPivot($detail, $order)

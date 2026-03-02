@@ -138,11 +138,8 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
             'active' => $request->get('active', 1),
             'create_date' => $request->create_date,
         ];
-        if ($request->get('create_date')) {
-            $data['created_at'] = $request->get('create_date');
-            $data['updated_at'] = $request->get('create_date');
-            $data['timestamps'] = false;
-        }
+        // Không ghi đè created_at/updated_at - giữ timestamp thực tế
+        // create_date chỉ để lưu ngày người dùng chọn (dùng cho báo cáo)
         return $data;
     }
 

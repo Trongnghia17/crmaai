@@ -189,44 +189,73 @@
             <tbody>
                 @foreach($order->orderDetail ?? [] as $item)
                     @php
+                    // Kiểm tra nếu là hàng tặng
+                    $isGift = isset($item->is_gift) && $item->is_gift == 1;
+                    
                     $itemPrice = $item->product->retail_cost;
                     $itemSubTotal = $itemPrice * $item->quantity;
                     $discountAmount = 0;
                     
-                    // Tính giảm giá nếu có
-                    if ($item->discount > 0) {
-                        if ($item->discount_type == 1) {
-                            // Giảm theo %
-                            $discountAmount = $itemSubTotal * $item->discount / 100;
-                        } else {
-                            // Giảm theo số tiền (giảm giá cho mỗi sản phẩm)
-                            $discountAmount = $item->discount * $item->quantity;
+                    // Nếu là hàng tặng, set giá = 0
+                    if ($isGift) {
+                        $itemPrice = 0;
+                        $itemSubTotal = 0;
+                        $itemTotal = 0;
+                        $discountAmount = 0;
+                    } else {
+                        // Tính giảm giá nếu có
+                        if ($item->discount > 0) {
+                            if ($item->discount_type == 1) {
+                                // Giảm theo %
+                                $discountAmount = $itemSubTotal * $item->discount / 100;
+                            } else {
+                                // Giảm theo số tiền (giảm giá cho mỗi sản phẩm)
+                                $discountAmount = $item->discount * $item->quantity;
+                            }
                         }
+                        
+                        $itemTotal = $itemSubTotal - $discountAmount;
+                        $total += $itemSubTotal; // Tổng tiền chưa trừ giảm giá
+                        $totalDiscount += $discountAmount; // Tổng tiền giảm từng sản phẩm
                     }
-                    
-                    $itemTotal = $itemSubTotal - $discountAmount;
-                    $total += $itemSubTotal; // Tổng tiền chưa trừ giảm giá
-                    $totalDiscount += $discountAmount; // Tổng tiền giảm từng sản phẩm
                     @endphp
                     <tr>
                         <td>
                             {{ $item->product->name }}
-                            @if($item->discount > 0)
+                            @if($isGift)
+                                <br><small style="color: green; font-weight: bold; font-size: 9px;">
+                                    ( HÀNG TẶNG)
+                                </small>
+                            @elseif($item->discount > 0)
                                 <br><small style="color: black; font-size: 9px;">
                                     (Giảm: {{ $item->discount_type == 1 ? $item->discount.'%' : number_format($item->discount, 0, ',', '.') }})
                                 </small>
                             @endif
                         </td>
                         <td class="text-center">{{ $item->quantity }}</td>
-                        <td class="text-right">{{ number_format($itemPrice, 0, ',', '.') }}</td>
                         <td class="text-right">
-                            @if($item->discount > 0)
+                            @if($isGift)
+                                <span style="color: green; font-weight: bold;">MIỄN PHÍ</span>
+                            @else
+                                {{ number_format($itemPrice, 0, ',', '.') }}
+                            @endif
+                        </td>
+                        <td class="text-right">
+                            @if($isGift)
+                                -
+                            @elseif($item->discount > 0)
                                 {{ number_format($discountAmount, 0, ',', '.') }}
                             @else
                                 0
                             @endif
                         </td>
-                        <td class="text-right">{{ number_format($itemTotal, 0, ',', '.') }}</td>
+                        <td class="text-right">
+                            @if($isGift)
+                                <span style="color: green; font-weight: bold;">MIỄN PHÍ</span>
+                            @else
+                                {{ number_format($itemTotal, 0, ',', '.') }}
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
