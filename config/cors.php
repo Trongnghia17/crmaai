@@ -9,16 +9,7 @@ return [
 
     // In production, prefer restricting the allowed origins to your frontend domains.
     // Example: allow both http and https variants of the frontend domain used by your app.
-    'allowed_origins' => [
-        'http://localhost:8080',
-        'http://127.0.0.1:8080',
-        'http://crm.aaipharma.vn',
-        'https://crm.aaipharma.vn',
-        'http://hht.aaipharma.vn',
-        'https://hht.aaipharma.vn',
-        
-    ],
-
+     'allowed_origins' => ['*'],
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
