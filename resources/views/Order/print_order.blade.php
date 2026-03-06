@@ -159,7 +159,8 @@
     @endif
     
     <div style="text-align: center; font-size: 10px; margin-bottom: 8px;">
-        Ngày {{ date('d', strtotime($order->created_at)) }} tháng {{ date('m', strtotime($order->created_at)) }} năm {{ date('Y', strtotime($order->created_at)) }}
+        @php $printDate = $order->create_date ?? $order->created_at; @endphp
+        Ngày {{ date('d', strtotime($printDate)) }} tháng {{ date('m', strtotime($printDate)) }} năm {{ date('Y', strtotime($printDate)) }}
     </div>
 
     <div class="invoice_top">
