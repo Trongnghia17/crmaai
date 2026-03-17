@@ -89,7 +89,27 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
             });
         }
 
-        if ($request->start_date && $request->end_date) {
+        // Filter by business date (create_date) for reporting.
+        // Frontend screens often send from/to; some send start_date/end_date.
+        // Prefer create_date when present because created_at/updated_at can shift by timezone or later edits.
+        $createDateFrom = $request->get('create_date_from')
+            ?? $request->get('from')
+            ?? $request->get('start_date');
+        $createDateTo = $request->get('create_date_to')
+            ?? $request->get('to')
+            ?? $request->get('end_date');
+
+        if ($createDateFrom && $createDateTo) {
+            // `create_date` is a DATE column, so compare by date values (no time suffix)
+            $query->whereBetween('create_date', [
+                $createDateFrom,
+                $createDateTo,
+            ]);
+        }
+
+        // Fallback filter by updated_at only when business-date range is not provided.
+        // Otherwise, updated_at range can unintentionally exclude valid create_date matches.
+        if (!$createDateFrom && !$createDateTo && $request->start_date && $request->end_date) {
             $query->whereBetween('updated_at', [
                 $request->start_date . ' 00:00:00',
                 $request->end_date . ' 23:59:59',
