@@ -33,6 +33,7 @@ class User extends Authenticatable implements JWTSubject
         'last_login_at',
         'last_login_ip_address',
         'store_name',
+        'company_id',
     ];
 
     /**
@@ -54,7 +55,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            // 'password' => 'hashed',
         ];
     }
 
@@ -82,5 +83,23 @@ class User extends Authenticatable implements JWTSubject
     public function user_package()
     {
         return $this->hasMany(UserPackage::class);
+    }
+
+    // 🔗 thuộc công ty
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    // 🔗 1 user có nhiều chấm công
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    // 🔗 log chấm công
+    public function attendanceLogs()
+    {
+        return $this->hasMany(AttendanceLog::class);
     }
 }
