@@ -15,6 +15,12 @@ class AttendanceController extends Controller
         if (!session('user_id')) {
             return redirect('/login')->with('error', 'Vui lòng đăng nhập');
         }
+        $user = \App\Models\User::find(session('user_id'));
+
+        // Check quyền
+        if ($user->type == 1) {
+            return redirect('/dashboard');
+        }
         $user = $this->getUser();
         $attendance = Attendance::where('user_id', $user->id)
             ->whereDate('work_date', today())
@@ -29,12 +35,19 @@ class AttendanceController extends Controller
             return redirect('/login')->with('error', 'Vui lòng đăng nhập');
         }
 
+        $user = \App\Models\User::find(session('user_id'));
+
+        // Check quyền
+        if (!$user || $user->type != 1) {
+            return redirect('/')->with('error', 'Bạn không có quyền truy cập Dashboard');
+        }
+
         $attendances = Attendance::with('user')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
 
-        $users = User::with('company')->get();
+        $users = User::with('company')->where('type', '!=', 1)->get();
 
         $companies = Company::all();
 

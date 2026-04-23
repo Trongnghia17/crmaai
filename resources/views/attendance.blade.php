@@ -81,7 +81,7 @@
             }
 
             video {
-                max-height: 220px;
+                height: 300px;
             }
 
             .btn-action {
@@ -156,7 +156,13 @@
 
                 {{-- Camera --}}
                 <div class="text-center mb-3">
-                    <video id="video" width="100%" autoplay></video>
+                    <video id="video" width="100%" autoplay playsinline></video>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button class="btn btn-secondary btn-action" onclick="switchCamera()">
+                        🔄 Đổi camera
+                    </button>
                 </div>
 
                 <canvas id="canvas" style="display:none;"></canvas>
@@ -193,14 +199,33 @@
 </div>
 
 <script>
+let currentFacingMode = "user"; // cam trước mặc định
+let currentStream = null;
+
 // mở camera
-navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
+async function startCamera() {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: currentFacingMode }
+        });
+
+        currentStream = stream;
         document.getElementById('video').srcObject = stream;
-    })
-    .catch(() => {
+
+    } catch (err) {
         alert("Không truy cập được camera");
-    });
+    }
+}
+
+// đổi camera
+function switchCamera() {
+    currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+    startCamera();
+}
 
 // loading UI
 function showLoading(button) {
@@ -219,7 +244,6 @@ function showLoading(button) {
 
 // chụp ảnh + GPS
 function capture(type) {
-
     const button = event.target.closest('button');
     showLoading(button);
 
@@ -249,6 +273,9 @@ function capture(type) {
         document.getElementById('loading').style.display = 'none';
     });
 }
+
+// chạy khi load
+startCamera();
 </script>
 
 </body>

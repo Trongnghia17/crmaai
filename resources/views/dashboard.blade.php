@@ -67,10 +67,10 @@
                                         <td>{{ $item->user->name ?? '' }}</td>
                                         <td>{{ $item->work_date->format('d/m/Y') }}</td>
                                         <td>
-                                            {{ $item->check_in_time ? $item->check_in_time->format('H:i') : '---' }}
+                                            {{ $item->check_in_time ? $item->check_in_time->addHours(7)->format('H:i') : '---' }}
                                         </td>
                                         <td>
-                                            {{ $item->check_out_time ? $item->check_out_time->format('H:i') : '---' }}
+                                            {{ $item->check_out_time ? $item->check_out_time->addHours(7)->format('H:i') : '---' }}
                                         </td>
                                         <td>
                                             @if ($item->check_in_image)
