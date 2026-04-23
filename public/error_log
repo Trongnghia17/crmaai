@@ -1,0 +1,3 @@
+[04-Feb-2026 08:44:34 UTC] PHP Deprecated:  Optional parameter $price declared before required parameter $time is implicitly treated as a required parameter in /home/bvcnfjtz/aaiapi.guongkinhhoangquynh.vn/app/Jobs/ReportAndReceiptCancel.php on line 26
+[04-Feb-2026 09:01:37 UTC] PHP Deprecated:  Optional parameter $price declared before required parameter $time is implicitly treated as a required parameter in /home/bvcnfjtz/aaiapi.guongkinhhoangquynh.vn/app/Jobs/ReportAndReceiptCancel.php on line 26
+[04-Feb-2026 09:22:07 UTC] PHP Deprecated:  Optional parameter $price declared before required parameter $time is implicitly treated as a required parameter in /home/bvcnfjtz/aaiapi.guongkinhhoangquynh.vn/app/Jobs/ReportAndReceiptCancel.php on line 26
